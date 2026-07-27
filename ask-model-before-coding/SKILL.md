@@ -1,4 +1,9 @@
-Before you write code: ask about the model
+---
+name: ask-model-before-coding
+description: Ask which model to use before writing any code, splitting the work into a core-change unit and a tests unit. Use at the transition from discussion into actually editing files — implementations, refactors, bug fixes, migrations, or executing an agreed plan. Not for reading, searching, planning, or design discussion.
+---
+
+# Before you write code: ask about the model
 
 Whenever the conversation reaches the point of making a code change — an implementation, a refactor, a bug fix, a migration, or executing an agreed plan — stop before touching a file and ask which model to use. Split the work into two separately-modeled units: (1) the core code change and (2) its tests (unit and e2e). Ask about both in a single AskUserQuestion call, once per implementation task — not per file.
 
