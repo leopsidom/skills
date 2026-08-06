@@ -21,6 +21,20 @@ npx @leopsidom/skills list
 The installer copies plain directories — nothing is symlinked, and nothing runs on
 `npm install`. Delete a skill by removing its directory from `~/.claude/skills`.
 
+### Without npm
+
+These skills also install straight from this repo with the
+[`skills`](https://github.com/vercel-labs/skills) CLI, which needs nothing published:
+
+```bash
+npx skills add leopsidom/skills
+```
+
+Note that it takes a GitHub `owner/repo`, **not** the npm package name — passing
+`@leopsidom/skills` there is read as a repository path and fails with an unhelpful
+error. That CLI also symlinks rather than copies by default, so the skills break if
+you later move the directory it cloned into; `npx @leopsidom/skills install` copies.
+
 ## Skills
 
 ### `ask-model-before-coding`
