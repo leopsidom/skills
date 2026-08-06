@@ -72,6 +72,26 @@ Before writing code for any task, invoke the `ask-model-before-coding` skill —
 including at the start of each item when working through a plan or PR train.
 ```
 
+## Publishing (maintainers)
+
+```bash
+npm login                                                    # once, for registry.npmjs.org
+npm version patch                                            # or minor / major
+npm publish --@leopsidom:registry=https://registry.npmjs.org/
+git push --follow-tags
+```
+
+The scope override is load-bearing on any machine whose `.npmrc` maps `@leopsidom`
+to GitHub Packages. A `@scope:registry` entry outranks both the `publishConfig.registry`
+in `package.json` **and** the `--registry` flag, so without it `npm publish` silently
+lands a private package on GitHub Packages that nobody can `npx`. Confirm the target
+before trusting it:
+
+```bash
+npm publish --dry-run --@leopsidom:registry=https://registry.npmjs.org/
+# → Publishing to https://registry.npmjs.org/ with tag latest and public access
+```
+
 ## License
 
 MIT
