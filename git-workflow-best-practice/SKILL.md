@@ -1,0 +1,32 @@
+---
+name: git-workflow-best-practice
+description: Keep `main` clean — read the current branch before every commit, land work through a feature branch and a pull request, and open PRs ready for review rather than draft. Use immediately before any `git commit`, `git push`, or `gh pr create`, and again before each later commit in the same session.
+---
+
+# Git workflow: `main` only advances through merged PRs
+
+That is an **invariant**, not a starting condition: it has to hold at every commit of a session, not just the first one. All changes land on a feature branch and reach `main` through a merged pull request. The three rules below are what keep it true.
+
+## Read the branch before every commit
+
+Run `git branch --show-current` as its own command, read the output, and only then commit. Treat it as a **precondition** of the commit — a value you evaluate and act on.
+
+Keeping it a separate call is the whole point. Chaining it (`git branch --show-current && git commit …`) puts the branch name on screen after the decision to commit is already made, so the check costs a line and buys nothing.
+
+Re-run it before **every** commit, not just the first. The checkout drifts: a merged PR, a `git pull`, a rebase, or another tool can put you back on `main` between two commits of the same task, and nothing announces it.
+
+If the check reports `main`, create or switch to a feature branch, then commit.
+
+### Recovering a commit that already landed on `main`
+
+While it is local and unpushed, the commit is recoverable. Create the feature branch at the current `HEAD` so the branch carries the commit, verify it with `git log origin/main..HEAD`, and only once you see the commit listed there, move `main` back with `git reset --hard origin/main`. The reset discards everything on `main` that the remote does not have, so the verification is what makes it safe.
+
+## Land work through a feature branch and a pull request
+
+Branch, commit, push the branch, open a PR. `main` advances by merging that PR and by nothing else — no direct commits, no direct pushes, no force-pushes.
+
+## Open pull requests active, not draft
+
+Use plain `gh pr create`. A PR whose work is complete and whose gates pass goes up ready for review.
+
+Draft is for a PR that genuinely is not ready for one: work still in progress, a known-failing gate, a deliberate placeholder, or a stacked PR blocked on an unmerged predecessor. When you open a draft, say in the body why it is a draft and what has to clear before it is ready, then run `gh pr ready <number>` as soon as that clears.

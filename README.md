@@ -56,20 +56,41 @@ with no user prompt to re-trigger it.
 It deliberately does not fire for reading, searching, planning, or design discussion —
 only for the transition into actually editing files.
 
+### `git-workflow-best-practice`
+
+Keeps `main` clean: the agent reads the current branch before every commit, lands work
+through a feature branch and a pull request, and opens PRs ready for review instead of
+as drafts.
+
+The rule that does the real work is the branch check, and specifically that it is run
+as its **own** command. An agent that chains it (`git branch --show-current && git
+commit …`) has technically obeyed and learned nothing — the branch name appears after
+the decision to commit is already made. It also has to run before *every* commit, not
+just the first: a merged PR, a `git pull`, or a rebase can put the checkout back on
+`main` between two commits of the same task, and nothing announces it. That is a real
+way to push to `main` while believing you are on a feature branch.
+
+It also carries the recovery, which is the part nobody remembers under pressure: a
+commit that landed on `main` locally and is still unpushed is salvageable by branching
+at `HEAD` first, verifying, and only then resetting `main` back to the remote.
+
 ## Making it stick
 
-This skill is model-invoked, so the agent has to notice it should fire. That is a
+These skills are model-invoked, so the agent has to notice it should fire. That is a
 weaker trigger than an always-loaded instruction, and it is weakest at exactly the
-moment the skill targets: mid-flow, between items of a plan, when nothing in the
-conversation prompts a fresh look at the skill list.
+moment they target: mid-flow, between items of a plan or just before a commit, when
+nothing in the conversation prompts a fresh look at the skill list.
 
-If you want it to hold every time, add a one-line pointer to your `CLAUDE.md` or
+If you want them to hold every time, add a one-line pointer to your `CLAUDE.md` or
 `AGENTS.md` as well. The line stays in context on every turn; the skill body still
 loads only when it fires:
 
 ```markdown
 Before writing code for any task, invoke the `ask-model-before-coding` skill —
 including at the start of each item when working through a plan or PR train.
+
+Before any `git commit`, `git push`, or `gh pr create`, invoke the
+`git-workflow-best-practice` skill — including before each later commit in a session.
 ```
 
 ## Publishing (maintainers)
