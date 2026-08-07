@@ -59,8 +59,8 @@ only for the transition into actually editing files.
 ### `git-workflow-best-practice`
 
 Keeps `main` clean: the agent reads the current branch before every commit, lands work
-through a feature branch and a pull request, and opens PRs ready for review instead of
-as drafts.
+through a feature branch and a pull request, opens PRs ready for review instead of as
+drafts, and collapses a stack as soon as its predecessor merges.
 
 The rule that does the real work is the branch check, and specifically that it is run
 as its **own** command. An agent that chains it (`git branch --show-current && git
@@ -73,6 +73,17 @@ way to push to `main` while believing you are on a feature branch.
 It also carries the recovery, which is the part nobody remembers under pressure: a
 commit that landed on `main` locally and is still unpushed is salvageable by branching
 at `HEAD` first, verifying, and only then resetting `main` back to the remote.
+
+The stacked-PR rule exists because a stack is a liability with a short shelf life. The
+agent re-reads the predecessor's state before opening the PR and again whenever it
+returns to one, so a PR is left based on something other than `main` only while its
+predecessor is genuinely still open. The trap it defuses is the rebase itself: under a
+squash merge the predecessor arrives in `main` as one new commit, so its originals are
+absent *by identity* even though their content is there. A plain `git rebase
+origin/main` replays each of them onto a `main` that already has those changes and
+produces a conflict per commit — which reliably reads as "the rebase is going wrong"
+and invites an abort. `git rebase --onto origin/main origin/<predecessor>` drops
+everything up to the predecessor's old tip and replays only the branch's own work.
 
 ## Making it stick
 
