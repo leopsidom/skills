@@ -1,13 +1,14 @@
 {
   "name": "@leopsidom/skills",
   "version": "0.1.0",
-  "description": "Agent skills for Claude Code. Ships ask-model-before-coding: pick the model deliberately before every code change.",
+  "description": "Agent skills for Claude Code: pick the model deliberately before every code change, and keep main clean behind feature branches and pull requests.",
   "keywords": [
     "claude",
     "claude-code",
     "agent-skills",
     "skill",
-    "ai"
+    "ai",
+    "git"
   ],
   "homepage": "https://github.com/leopsidom/skills#readme",
   "bugs": "https://github.com/leopsidom/skills/issues",
@@ -24,6 +25,7 @@
   "files": [
     "bin/",
     "ask-model-before-coding/",
+    "git-workflow-best-practice/",
     "README.md"
   ],
   "engines": {
