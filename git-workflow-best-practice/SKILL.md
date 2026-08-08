@@ -1,6 +1,6 @@
 ---
 name: git-workflow-best-practice
-description: Keep `main` clean — read the current branch before every commit, land work through a feature branch and a pull request, open PRs ready for review rather than draft, and rebase a stacked PR onto `main` once its predecessor merges. Use immediately before any `git commit`, `git push`, or `gh pr create`, again before each later commit in the same session, and whenever returning to a stacked PR.
+description: Keep `main` clean — read the current branch before every commit, land work through a feature branch and a pull request, verify the branch merges cleanly into its base before opening the PR, open PRs ready for review rather than draft, and rebase a stacked PR onto `main` once its predecessor merges. Use immediately before any `git commit`, `git push`, or `gh pr create`, again before each later commit in the same session, and whenever returning to a stacked PR.
 ---
 
 # Git workflow: `main` only advances through merged PRs
@@ -24,6 +24,36 @@ While it is local and unpushed, the commit is recoverable. Create the feature br
 ## Land work through a feature branch and a pull request
 
 Branch, commit, push the branch, open a PR. `main` advances by merging that PR and by nothing else — no direct commits, no direct pushes, no force-pushes.
+
+## Check the branch merges cleanly into its base before opening the PR
+
+Whenever a PR goes up against a branch, verify first that there is no merge conflict against that branch. Fetch, then test the merge against the **base the PR will target** — `main` normally, the predecessor for a stack:
+
+```bash
+git fetch origin
+git merge-tree --write-tree origin/<base> HEAD >/dev/null; echo $?
+```
+
+`0` means the merge is clean and the PR can go up. `1` means conflicts: rebase onto the base, resolve them, and re-run the check before pushing.
+
+```bash
+git rebase origin/<base>
+git push --force-with-lease
+```
+
+Force-pushing here is the feature branch, which is yours to rewrite; the prohibition above is on `main`.
+
+Read the **exit code**, not the output. The older three-argument `git merge-tree <base> <branch1> <branch2>` prints conflict markers to stdout but exits `0` either way, so a check written against it reports every branch clean — including the ones that conflict. `--write-tree` is what makes the status meaningful, and it needs git 2.38 or newer.
+
+The result is a snapshot of the base as of that `git fetch`. It goes stale the moment the base moves, so re-run it before a later push to the same PR rather than trusting the check that passed when the branch was first opened.
+
+Once the PR exists, confirm GitHub reached the same conclusion:
+
+```bash
+gh pr view <number> --json mergeable,mergeStateStatus
+```
+
+`CONFLICTING` means it conflicts. `UNKNOWN` means GitHub has not finished computing it — mergeability is calculated asynchronously, so a query fired immediately after `gh pr create` usually returns `UNKNOWN`. That is *not* a clean result; wait a few seconds and query again until it settles on `MERGEABLE` or `CONFLICTING`.
 
 ## Open pull requests active, not draft
 
@@ -63,3 +93,5 @@ gh pr ready <number>
 ```
 
 Either way the PR ends up based on `main`, and a base other than `main` means a predecessor that is still genuinely open.
+
+Whichever base the PR lands on, run the merge check above against **that** base before opening it — and again after re-targeting, since a branch that merged cleanly into the predecessor has proven nothing about `main`.
