@@ -59,8 +59,9 @@ only for the transition into actually editing files.
 ### `git-workflow-best-practice`
 
 Keeps `main` clean: the agent reads the current branch before every commit, lands work
-through a feature branch and a pull request, opens PRs ready for review instead of as
-drafts, and collapses a stack as soon as its predecessor merges.
+through a feature branch and a pull request, checks the branch merges cleanly into its
+base before the PR goes up, opens PRs ready for review instead of as drafts, and
+collapses a stack as soon as its predecessor merges.
 
 The rule that does the real work is the branch check, and specifically that it is run
 as its **own** command. An agent that chains it (`git branch --show-current && git
@@ -73,6 +74,15 @@ way to push to `main` while believing you are on a feature branch.
 It also carries the recovery, which is the part nobody remembers under pressure: a
 commit that landed on `main` locally and is still unpushed is salvageable by branching
 at `HEAD` first, verifying, and only then resetting `main` back to the remote.
+
+The merge-conflict rule is the one that keeps a PR from going up already broken. It runs
+`git merge-tree --write-tree origin/<base> HEAD` against whatever base the PR targets and
+reads the **exit code** — which is the whole trick, because the older three-argument
+`git merge-tree` prints conflict markers to stdout and exits `0` regardless, so a check
+built on it calls every branch clean. The second trap is on the other side: `gh pr view
+--json mergeable` right after `gh pr create` returns `UNKNOWN`, because GitHub computes
+mergeability asynchronously. `UNKNOWN` is not `MERGEABLE`, and treating it as one is how a
+conflicting PR gets declared green.
 
 The stacked-PR rule exists because a stack is a liability with a short shelf life. The
 agent re-reads the predecessor's state before opening the PR and again whenever it
