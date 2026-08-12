@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const PKG_ROOT = fileURLToPath(new URL('..', import.meta.url))
+const SKILLS_ROOT = join(PKG_ROOT, 'skills')
 
 const USAGE = `leo-skills — install Leo's agent skills into a Claude Code skills directory
 
@@ -21,12 +22,12 @@ Options
 `
 
 async function shippedSkills() {
-  const entries = await readdir(PKG_ROOT, { withFileTypes: true })
+  const entries = await readdir(SKILLS_ROOT, { withFileTypes: true }).catch(() => [])
   const found = []
   for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith('.') || entry.name === 'bin' || entry.name === 'node_modules') continue
+    if (!entry.isDirectory() || entry.name.startsWith('.')) continue
     try {
-      await stat(join(PKG_ROOT, entry.name, 'SKILL.md'))
+      await stat(join(SKILLS_ROOT, entry.name, 'SKILL.md'))
       found.push(entry.name)
     } catch {
       // not a skill directory
@@ -92,7 +93,7 @@ async function main() {
       continue
     }
     if (exists) await rm(dest, { recursive: true, force: true })
-    await cp(join(PKG_ROOT, name), dest, { recursive: true })
+    await cp(join(SKILLS_ROOT, name), dest, { recursive: true })
     process.stdout.write(`  ${(exists ? 'update' : 'add').padEnd(6)} ${name}\n`)
     installed++
   }

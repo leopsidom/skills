@@ -21,6 +21,12 @@ npx @leopsidom/skills list
 The installer copies plain directories — nothing is symlinked, and nothing runs on
 `npm install`. Delete a skill by removing its directory from `~/.claude/skills`.
 
+Each skill lives in its own directory under `skills/` in this repo, and the installer
+discovers them by looking for a `SKILL.md` inside each one. They install *flat* into the
+target — `~/.claude/skills/ask-model-before-coding`, not `~/.claude/skills/skills/...` —
+so the `skills/` directory is a detail of this repo's layout, not something that reaches
+your machine. Adding a skill means adding a directory there; nothing needs registering.
+
 ### Without npm
 
 These skills also install straight from this repo with the
@@ -29,6 +35,9 @@ These skills also install straight from this repo with the
 ```bash
 npx skills add leopsidom/skills
 ```
+
+The `skills/<name>/SKILL.md` layout above is one of the standard locations that CLI
+looks in, so this channel keeps working without any per-skill registration.
 
 Note that it takes a GitHub `owner/repo`, **not** the npm package name — passing
 `@leopsidom/skills` there is read as a repository path and fails with an unhelpful
@@ -55,6 +64,13 @@ with no user prompt to re-trigger it.
 
 It deliberately does not fire for reading, searching, planning, or design discussion —
 only for the transition into actually editing files.
+
+It also fires in unattended runs — background jobs, scheduled runs, subagents, headless
+sessions. That is the case where an agent is most tempted to skip it, and the one where
+skipping costs the most: nobody is watching a long unattended task quietly run the
+strongest model end to end, or hand the intricate part to a cheap one. Nobody being
+present to answer is not an answer, so the run waits on the question rather than
+inferring a default.
 
 ### `git-workflow-best-practice`
 
