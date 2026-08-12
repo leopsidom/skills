@@ -1,6 +1,6 @@
 {
   "name": "@leopsidom/skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Agent skills for Claude Code: pick the model deliberately before every code change, and keep main clean behind feature branches and pull requests.",
   "keywords": [
     "claude",
@@ -24,8 +24,7 @@
   },
   "files": [
     "bin/",
-    "ask-model-before-coding/",
-    "git-workflow-best-practice/",
+    "skills/",
     "README.md"
   ],
   "engines": {
