@@ -111,9 +111,44 @@ produces a conflict per commit — which reliably reads as "the rebase is going 
 and invites an abort. `git rebase --onto origin/main origin/<predecessor>` drops
 everything up to the predecessor's old tip and replays only the branch's own work.
 
+### `organize-modules`
+
+A user-invoked audit — you type `/organize-modules` — of how a codebase's files and
+packages are organized. It delivers a diagnosis plus 5–8 **themes**: named refactor
+plans, each turning measured friction into a target structure of *deep services* —
+packages that expose few exports and rich behavior. It works at the group level (where
+files live, what a package exports, how services relate); the interface design of an
+individual class stays out of scope.
+
+The measuring is done by a bundled zero-dependency Node script, not by the model's
+impression of the tree: package-level import cycles, cross-package change coupling from
+git history, packages that co-change with no import edge between them (hidden shared
+knowledge), export-surface-to-size ratios, deep imports that bypass a declared index,
+and grab-bag files whose importers use disjoint slices of them. The git-based signals
+are exact for any language; the import graph is regex-extracted and reports its own
+resolution coverage, so the agent knows when to reach for a native grapher instead.
+
+Judgment is layered so doctrine comes last: the repo's own convention first
+(inconsistency with itself is the first-class finding), measured friction second, and
+six named principles only as tiebreaker — with framework-owned directories (Next.js
+`app/`, Rails `app/models`, Go `cmd/`) explicitly off-limits to reshaping.
+
+The rule that does the real work is the accounting bar: **every signal the script
+reports above threshold must be either claimed by a theme or dismissed in the diagnosis
+with a reason.** Without it, an agent cherry-picks the fun findings and goes quiet on
+the rest, and the audit silently shrinks to whatever was interesting that day.
+
+Plans are written to be executed cold — a later session holding only the plan file and
+the repo can perform them. Execution itself is a separate branch of the skill with two
+rails: every batch is behavior-preserving (structure only — a step that needs a behavior
+change stops and surfaces it), and every batch ends at a green gate — the repo's own
+build and tests pass before the next batch starts, and a red batch gets fixed or
+reverted, never buried.
+
 ## Making it stick
 
-These skills are model-invoked, so the agent has to notice it should fire. That is a
+`ask-model-before-coding` and `git-workflow-best-practice` are model-invoked, so the
+agent has to notice it should fire. That is a
 weaker trigger than an always-loaded instruction, and it is weakest at exactly the
 moment they target: mid-flow, between items of a plan or just before a commit, when
 nothing in the conversation prompts a fresh look at the skill list.
@@ -129,6 +164,9 @@ including at the start of each item when working through a plan or PR train.
 Before any `git commit`, `git push`, or `gh pr create`, invoke the
 `git-workflow-best-practice` skill — including before each later commit in a session.
 ```
+
+`organize-modules` needs no pointer: it is user-invoked, so you reach it by typing
+its name.
 
 ## Publishing (maintainers)
 
