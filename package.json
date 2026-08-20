@@ -1,7 +1,7 @@
 {
   "name": "@leopsidom/skills",
-  "version": "0.4.0",
-  "description": "Agent skills for Claude Code: pick the model deliberately before every code change, and keep main clean behind feature branches and pull requests.",
+  "version": "0.5.0",
+  "description": "Agent skills for Claude Code: pick the model deliberately before every code change, keep main clean behind feature branches and pull requests, and audit module organization into themed refactor plans.",
   "keywords": [
     "claude",
     "claude-code",
